@@ -1,0 +1,37 @@
+# CI for git.pp-grid.
+#
+# Scope, honestly: install + typecheck only.
+#
+# The repo's acceptance playtest (test/playtest.mjs) is LIVE-ONLY: it runs
+# against a deployed instance, re-folds the record from the server's own
+# responses, and compares — it cannot run in CI and is not faked here.
+# It stays a manual step against a deployment:
+#
+#   GRID_URL=https://gitpp-grid.superinstance.dev node test/playtest.mjs
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck:
+    name: install + typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run typecheck
